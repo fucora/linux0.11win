@@ -1,0 +1,17 @@
+bootload:bootload.s
+	as86 -0 -a -o bootload.o bootload.s
+	ld86 -0 -s -o bootload bootload.o
+	
+	#生成的bootload可执行代码前面会包含32字节无用信息,所以"skip=2"
+	#bootload大小=27*16=432=0x1be0字节,所以"count=27",这样也避免了破坏放在0x1be处的分区表信息
+	dd bs=16 if=bootload of=/dev/hdb skip=2 count=27
+	
+	mcopy -n bootload b:\bootload
+	mcopy -n bootload.s b:\bootload.s
+	mcopy -n makefile b:\makefile
+	sync
+clean:
+	rm bootload
+	rm bootload.o
+copy:
+	mcopy -n b:\bootload.s bootload.s
